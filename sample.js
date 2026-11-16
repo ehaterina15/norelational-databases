@@ -40,51 +40,76 @@ async function main() {
   // ----------------------------------------------------------
   // TODO 1 - insertOne with an embedded object
   // ----------------------------------------------------------
-  // In mongosh you would write:
-  //   db.books.insertOne({ title: "...", publisher: { name: "...", country: "..." } })
-  //
-  // Do the same here. Insert one book that has a publisher field
-  // containing an embedded object with at least a name and a country.
-
+  await books.insertOne({
+    title: "Les Misérables",
+    author: "Victor Hugo",
+    publisher: { name: "Gallimard", country: "France" }
+  });
   // ----------------------------------------------------------
   // TODO 2 - insertOne with an array
-  // ----------------------------------------------------------
-  // Insert one book that has a tags field containing
-  // an array of at least 3 strings.
+  await books.insertOne({
+  title: "Guerre et Paix",
+  genres: ["roman-épopée ", "roman historique"]
+});
 
   // ----------------------------------------------------------
   // TODO 3 - insertMany
   // ----------------------------------------------------------
-  // Insert at least 5 books in a single call using insertMany.
-  // Include a mix: some with a publisher object, some with tags, some with both.
-
+  await books.insertMany([
+    {
+      title: "Crime et Châtiment",
+      author: "Fiodor Dostoïevski",
+      publisher: { name: "Folio", country: "France" },
+      tags: ["roman psychologique", "classique", "russe"]
+    },
+    {
+      title: "Dune",
+      author: "Frank Herbert",
+      publisher: { name: "Chilton Books", country: "USA" },
+      tags: ["sci-fi", "aventure", "classique"]
+    },
+    {
+      title: "1984",
+      author: "George Orwell",
+      publisher: { name: "Secker & Warburg", country: "UK" }
+    },
+    {
+      title: "Le Petit Prince",
+      author: "Antoine de Saint-Exupéry",
+      tags: ["conte", "philosophie", "jeunesse"]
+    },
+    {
+      title: "Anonymous Notebook",
+      author: "Unknown"
+    }
+  ]);
   // ----------------------------------------------------------
   // TODO 4 - find all documents
   // ----------------------------------------------------------
-  // Retrieve every document in the collection and log each title.
-  // Hint: find() returns a cursor - call .toArray() to get an array.
-
+  const all = await books.find().toArray();
+for (const m of all) {
+  console.log(m.title);
+}
   // ----------------------------------------------------------
   // TODO 5 - findOne with dot notation
   // ----------------------------------------------------------
-  // Find the first book whose publisher.country is "France".
-  // Dot notation lets you filter on a field inside an embedded object:
-  //   { "publisher.country": "France" }
-  // Log the title of the result.
+const one = await books.findOne({ "publisher.country": "France" });
+console.log(one.title);
 
   // ----------------------------------------------------------
   // TODO 6 - find with a filter
   // ----------------------------------------------------------
-  // Find all books whose publisher.country is "France".
-  // Log how many there are and list their titles.
-
-  // ----------------------------------------------------------
+const frenchBooks  = await books.find({ "publisher.country": "France" }).toArray();
+console.log(frenchBooks.length); 
+for (const b of frenchBooks) {
+    console.log(b.title);
+  } // ----------------------------------------------------------
   // TODO 7 - find with $exists
   // ----------------------------------------------------------
-  // Find all books that have a tags field, regardless of its value.
-  //   { tags: { $exists: true } }
-  // Log each title and its tags array.
-
+ const withTags = await books.find({ genres: { $exists: true } }).toArray();
+for (const m of withTags) {
+  console.log(m.title, m.tags);
+}
   // Always close the connection when you are done.
   await client.close();
 }
